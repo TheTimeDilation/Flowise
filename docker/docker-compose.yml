@@ -1,6 +1,21 @@
 version: '3.1'
 
 services:
+    pgvector-db:
+        image: ankane/pgvector
+        container_name: pgvector-db
+        restart: always
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
+        ports:
+            - "${POSTGRES_DB}:${POSTGRES_PORT}"
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        networks:
+            - flowise-net
+
     flowise:
         image: flowiseai/flowise:latest
         restart: always
@@ -134,3 +149,13 @@ services:
         volumes:
             - ~/.flowise:/root/.flowise
         entrypoint: /bin/sh -c "sleep 3; flowise start"
+        depends_on:
+            - pgvector-db
+        networks:
+            - flowise-net
+            
+volumes:
+    pgdata:
+
+networks:
+    flowise-net:
